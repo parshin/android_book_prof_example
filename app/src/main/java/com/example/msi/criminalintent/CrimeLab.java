@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class CrimeLab {
-    private static CrimeLab sCrimeLab;
 
+    private static CrimeLab sCrimeLab;
     private List<Crime> mCrimes;
 
     public static CrimeLab get(Context context) {
