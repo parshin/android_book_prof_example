@@ -35,17 +35,35 @@ public class CrimeLab {
     }
 
     public List<Crime> getCrimes() {
-        return new ArrayList<>();
-//        return mCrimes;
+        List<Crime> crimes = new ArrayList<>();
+        CrimeCursorWrapper cursor = queryCrimes(null, null);
+
+        try {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                crimes.add(cursor.getCrime());
+                cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+        return crimes;
     }
 
     public Crime getCrime(UUID id){
-//        for (Crime crime: mCrimes){
-//            if (crime.getId().equals(id)){
-//                return crime;
-//            }
-//        }
-        return null;
+        CrimeCursorWrapper cursor = queryCrimes(
+                CrimeDBSchema.CrimeTable.Cols.UUID + " = ?",
+                new String[] { id.toString() }
+        );
+        try {
+            if (cursor.getCount() == 0) {
+                return null;
+            }
+            cursor.moveToFirst();
+            return cursor.getCrime();
+        } finally {
+            cursor.close();
+        }
     }
 
     public void updateCrime(Crime crime) {
@@ -56,7 +74,9 @@ public class CrimeLab {
                 new String[] { uuidString });
 
     }
-    private Cursor queryCrimes(String whereClause, String[] whereArgs) {
+
+//    private Cursor queryCrimes(String whereClause, String[] whereArgs) {
+    private CrimeCursorWrapper queryCrimes(String whereClause, String[] whereArgs){
         Cursor cursor = mDatabase.query(
                 CrimeDBSchema.CrimeTable.NAME,
                 null, // columns - с null выбираются все столбцы
@@ -66,7 +86,7 @@ public class CrimeLab {
                 null, // having
                 null // orderBy
         );
-        return cursor;
+        return new CrimeCursorWrapper(cursor);
 
     }
 
@@ -75,7 +95,8 @@ public class CrimeLab {
         values.put(CrimeDBSchema.CrimeTable.Cols.UUID, crime.getId().toString());
         values.put(CrimeDBSchema.CrimeTable.Cols.TITLE, crime.getTitle());
         values.put(CrimeDBSchema.CrimeTable.Cols.DATE, crime.getDate().getTime());
-        values.put(CrimeDBSchema.CrimeTable.Cols.SOLVED, crime.isSolved() ? 1 : 0);
+//        values.put(CrimeDBSchema.CrimeTable.Cols.SOLVED, crime.isSolved() ? 1 : 0);
+        values.put(CrimeDBSchema.CrimeTable.Cols.SOLVED, 0);
 
         return values;
     }
